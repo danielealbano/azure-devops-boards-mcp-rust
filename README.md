@@ -17,6 +17,15 @@ A Model Context Protocol (MCP) server for interacting with Azure DevOps Boards a
 
 ## Installation
 
+### macOS (Homebrew)
+
+```bash
+brew tap danielealbano/mcp-tools
+brew install azure-devops-boards-mcp-rust
+```
+
+### Building from Source
+
 1.  Clone the repository:
     ```bash
     git clone https://github.com/danielealbano/azure-devops-boards-mcp-rust.git
