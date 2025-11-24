@@ -1,4 +1,4 @@
-name: CI - PR - Build & Release
+name: CD - Tag - Build & Release
 
 on:
   push:
