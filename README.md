@@ -38,7 +38,25 @@ Check out the section [MCP Configuration](#mcp-configuration) for how to configu
 
 This server leverages standard Azure authentication mechanisms (like `az` or `azd`) to query Azure DevOps.
 
-To authenticate, if you haven't already, run:
+#### Installing Azure CLI
+
+If you don't have the Azure CLI installed:
+
+**macOS (Homebrew):**
+```bash
+brew install azure-cli
+```
+
+**Windows (Chocolatey):**
+```powershell
+choco install azure-cli
+```
+
+For other installation methods, see the [official Azure CLI installation guide](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli).
+
+#### Logging In
+
+To authenticate, run:
 ```bash
 az login
 ```
