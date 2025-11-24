@@ -9,6 +9,9 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
   build-and-test:
     name: Build & Test - ${{ matrix.platform.os-name }}
