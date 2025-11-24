@@ -19,8 +19,8 @@ A Model Context Protocol (MCP) server for interacting with Azure DevOps Boards a
 
 1.  Clone the repository:
     ```bash
-    git clone https://github.com/yourusername/azure-devops-mcp.git
-    cd azure-devops-mcp
+    git clone https://github.com/danielealbano/azure-devops-boards-mcp-rust.git
+    cd azure-devops-boards-mcp-rust
     ```
 
 2.  Build the project:
@@ -60,7 +60,7 @@ First, build the project in release mode:
 cargo build --release
 ```
 
-The executable will be located at `./target/release/azure-devops-mcp`.
+The executable will be located at `./target/release/azure-devops-boards-mcp-rust`.
 
 ### Stdio Mode (Default)
 
@@ -69,14 +69,14 @@ The executable will be located at `./target/release/azure-devops-mcp`.
 This is the standard mode for MCP clients (like Claude Desktop or Cursor). **This mode is preferred for security as it ensures no credentials are shared over the network.**
 
 ```bash
-./target/release/azure-devops-mcp --organization <YOUR_ORG> --project <YOUR_PROJECT>
+./target/release/azure-devops-boards-mcp-rust --organization <YOUR_ORG> --project <YOUR_PROJECT>
 ```
 
 Or using environment variables:
 ```bash
 export AZDO_ORGANIZATION=myorg
 export AZDO_PROJECT=myproject
-./target/release/azure-devops-mcp
+./target/release/azure-devops-boards-mcp-rust
 ```
 
 ### HTTP Server Mode
@@ -84,7 +84,7 @@ export AZDO_PROJECT=myproject
 You can also run it as an HTTP server (SSE). **Note that in this mode, the server listens on `0.0.0.0` (all interfaces).**
 
 ```bash
-./target/release/azure-devops-mcp --server --port 3000 --organization <YOUR_ORG> --project <YOUR_PROJECT>
+./target/release/azure-devops-boards-mcp-rust --server --port 3000 --organization <YOUR_ORG> --project <YOUR_PROJECT>
 ```
 
 ## MCP Client Configuration
@@ -97,7 +97,7 @@ Add the following to your `claude_desktop_config.json`:
 {
   "mcpServers": {
     "azure-devops-boards": {
-      "command": "/absolute/path/to/azure-devops-mcp/target/release/azure-devops-mcp",
+      "command": "/absolute/path/to/azure-devops-boards-mcp-rust/target/release/azure-devops-boards-mcp-rust",
       "args": [
         "--organization",
         "YOUR_ORG_NAME",

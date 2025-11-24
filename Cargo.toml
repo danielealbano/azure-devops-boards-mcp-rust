@@ -1,5 +1,5 @@
 [package]
-name = "azure-devops-mcp"
+name = "azure-devops-boards-mcp-rust"
 version = "0.1.0"
 edition = "2024"
 
