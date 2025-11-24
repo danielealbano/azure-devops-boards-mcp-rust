@@ -121,21 +121,21 @@ impl BoardDetail {
     /// Extract work item types from the board's allowed mappings
     pub fn get_work_item_types(&self) -> Vec<String> {
         let mut types = Vec::new();
-        
-        if let Some(mappings) = &self.allowed_mappings {
-            if let Some(obj) = mappings.as_object() {
-                for (_column_type, type_mappings) in obj {
-                    if let Some(type_obj) = type_mappings.as_object() {
-                        for (work_item_type, _states) in type_obj {
-                            if !types.contains(work_item_type) {
-                                types.push(work_item_type.clone());
-                            }
+
+        if let Some(mappings) = &self.allowed_mappings
+            && let Some(obj) = mappings.as_object()
+        {
+            for (_column_type, type_mappings) in obj {
+                if let Some(type_obj) = type_mappings.as_object() {
+                    for (work_item_type, _states) in type_obj {
+                        if !types.contains(work_item_type) {
+                            types.push(work_item_type.clone());
                         }
-            }
+                    }
                 }
             }
         }
-        
+
         types
     }
 }
@@ -173,7 +173,7 @@ pub async fn list_work_item_types(
     client: &AzureDevOpsClient,
 ) -> Result<Vec<WorkItemType>, AzureError> {
     let path = "wit/workitemtypes?api-version=7.1";
-    let response: WorkItemTypeListResponse = client.get(&path).await?;
+    let response: WorkItemTypeListResponse = client.get(path).await?;
     Ok(response.value)
 }
 

@@ -13,8 +13,6 @@ use rmcp::{
 use serde_json::Value;
 use std::sync::Arc;
 
-/// Recursively removes all "_links" fields from a JSON value to reduce token usage for LLMs
-
 /// Recursively simplifies the JSON output to reduce token usage for LLMs.
 /// It removes "_links", "url", "descriptor", "imageUrl", "avatar" and simplifies field names.
 fn simplify_work_item_json(value: &mut Value) {
@@ -28,60 +26,57 @@ fn simplify_work_item_json(value: &mut Value) {
             map.remove("avatar");
 
             // Process "fields" if present (specific to Work Items)
-            if let Some(fields) = map.get_mut("fields") {
-                if let Value::Object(fields_map) = fields {
-                    let mut new_fields = serde_json::Map::new();
+            if let Some(Value::Object(fields_map)) = map.get_mut("fields") {
+                let mut new_fields = serde_json::Map::new();
 
-                    // Collect keys to remove or rename to avoid borrowing issues
-                    let keys: Vec<String> = fields_map.keys().cloned().collect();
+                // Collect keys to remove or rename to avoid borrowing issues
+                let keys: Vec<String> = fields_map.keys().cloned().collect();
 
-                    for key in keys {
-                        if let Some(mut val) = fields_map.remove(&key) {
-                            // Simplify Identity fields (objects with displayName, uniqueName, etc.)
-                            if let Value::Object(ref obj) = val {
-                                if let Some(Value::String(name)) = obj.get("displayName") {
-                                    let mut display_value = name.clone();
-                                    if let Some(Value::String(unique_name)) = obj.get("uniqueName")
-                                    {
-                                        if !unique_name.is_empty() {
-                                            display_value = format!("{} <{}>", name, unique_name);
-                                        }
-                                    }
-                                    val = Value::String(display_value);
-                                }
+                for key in keys {
+                    if let Some(mut val) = fields_map.remove(&key) {
+                        // Simplify Identity fields (objects with displayName, uniqueName, etc.)
+                        if let Value::Object(ref obj) = val
+                            && let Some(Value::String(name)) = obj.get("displayName")
+                        {
+                            let mut display_value = name.clone();
+                            if let Some(Value::String(unique_name)) = obj.get("uniqueName")
+                                && !unique_name.is_empty()
+                            {
+                                display_value = format!("{} <{}>", name, unique_name);
                             }
-
-                            // Simplify field names
-                            let new_key = if key.starts_with("System.") {
-                                key.strip_prefix("System.").unwrap().to_string()
-                            } else if key.starts_with("Microsoft.VSTS.Common.") {
-                                key.strip_prefix("Microsoft.VSTS.Common.")
-                                    .unwrap()
-                                    .to_string()
-                            } else if key.starts_with("Microsoft.VSTS.Scheduling.") {
-                                key.strip_prefix("Microsoft.VSTS.Scheduling.")
-                                    .unwrap()
-                                    .to_string()
-                            } else if key.starts_with("Microsoft.VSTS.CMMI.") {
-                                key.strip_prefix("Microsoft.VSTS.CMMI.")
-                                    .unwrap()
-                                    .to_string()
-                            } else if key.contains("_Kanban.Column") {
-                                // Handle dynamic WEF_..._Kanban.Column
-                                if key.ends_with(".Done") {
-                                    "Column.Done".to_string()
-                                } else {
-                                    "Column".to_string()
-                                }
-                            } else {
-                                key
-                            };
-
-                            new_fields.insert(new_key, val);
+                            val = Value::String(display_value);
                         }
+
+                        // Simplify field names
+                        let new_key = if key.starts_with("System.") {
+                            key.strip_prefix("System.").unwrap().to_string()
+                        } else if key.starts_with("Microsoft.VSTS.Common.") {
+                            key.strip_prefix("Microsoft.VSTS.Common.")
+                                .unwrap()
+                                .to_string()
+                        } else if key.starts_with("Microsoft.VSTS.Scheduling.") {
+                            key.strip_prefix("Microsoft.VSTS.Scheduling.")
+                                .unwrap()
+                                .to_string()
+                        } else if key.starts_with("Microsoft.VSTS.CMMI.") {
+                            key.strip_prefix("Microsoft.VSTS.CMMI.")
+                                .unwrap()
+                                .to_string()
+                        } else if key.contains("_Kanban.Column") {
+                            // Handle dynamic WEF_..._Kanban.Column
+                            if key.ends_with(".Done") {
+                                "Column.Done".to_string()
+                            } else {
+                                "Column".to_string()
+                            }
+                        } else {
+                            key
+                        };
+
+                        new_fields.insert(new_key, val);
                     }
-                    *fields_map = new_fields;
                 }
+                *fields_map = new_fields;
             }
 
             // Recursively process all remaining values
@@ -702,7 +697,7 @@ impl AzureMcpServer {
         // Merge any extra fields supplied as JSON string
         if let Some(extra) = &args.0.fields {
             if let Ok(extra_json) =
-                serde_json::from_str::<serde_json::Map<String, serde_json::Value>>(&extra)
+                serde_json::from_str::<serde_json::Map<String, serde_json::Value>>(extra)
             {
                 for (k, v) in extra_json {
                     field_map.insert(k, v);
@@ -1146,7 +1141,7 @@ impl AzureMcpServer {
         // Merge any extra fields
         if let Some(extra) = &args.0.fields {
             if let Ok(extra_json) =
-                serde_json::from_str::<serde_json::Map<String, serde_json::Value>>(&extra)
+                serde_json::from_str::<serde_json::Map<String, serde_json::Value>>(extra)
             {
                 for (k, v) in extra_json {
                     field_map.insert(k, v);
@@ -1250,7 +1245,7 @@ impl rmcp::ServerHandler for AzureMcpServer {
     fn get_info(&self) -> ServerInfo {
         ServerInfo {
             server_info: Implementation {
-                name: "azure-devops-mcp".into(),
+                name: "azure-devops-boards-mcp-rust".into(),
                 version: "0.1.0".into(),
                 icons: None,
                 title: None,

@@ -40,7 +40,7 @@ impl AzureDevOpsClient {
     async fn get_token(&self) -> Result<String, AzureError> {
         let token_response = self
             .credential
-            .get_token(&"499b84ac-1321-427f-aa17-267ca6975798")
+            .get_token("499b84ac-1321-427f-aa17-267ca6975798")
             .await?;
         Ok(token_response.token.secret().to_string())
     }
@@ -59,10 +59,10 @@ impl AzureDevOpsClient {
         );
 
         log::debug!("Request: {} {}", method, url);
-        if let Some(b) = &body {
-            if let Ok(json) = serde_json::to_string_pretty(b) {
-                log::debug!("Request body: {}", json);
-            }
+        if let Some(b) = &body
+            && let Ok(json) = serde_json::to_string_pretty(b)
+        {
+            log::debug!("Request body: {}", json);
         }
 
         let mut request = self
@@ -104,10 +104,10 @@ impl AzureDevOpsClient {
         let url = format!("https://dev.azure.com/{}/_apis/{}", self.organization, path);
 
         log::debug!("ORG Request: {} {}", method, url);
-        if let Some(b) = &body {
-            if let Ok(json) = serde_json::to_string_pretty(b) {
-                log::debug!("Request body: {}", json);
-            }
+        if let Some(b) = &body
+            && let Ok(json) = serde_json::to_string_pretty(b)
+        {
+            log::debug!("Request body: {}", json);
         }
 
         let mut request = self
@@ -154,10 +154,10 @@ impl AzureDevOpsClient {
         );
 
         log::debug!("TEAM Request: {} {}", method, url);
-        if let Some(b) = &body {
-            if let Ok(json) = serde_json::to_string_pretty(b) {
-                log::debug!("Request body: {}", json);
-            }
+        if let Some(b) = &body
+            && let Ok(json) = serde_json::to_string_pretty(b)
+        {
+            log::debug!("Request body: {}", json);
         }
 
         let mut request = self
