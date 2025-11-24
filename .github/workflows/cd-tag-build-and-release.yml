@@ -1,0 +1,89 @@
+name: CI - PR - Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04-arm
+            name: ubuntu-24.04-aarch64
+          - os: macos-latest
+            name: macos-aarch64
+          - os: windows-latest
+            name: windows-x86_64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Build (release)
+        run: cargo build --release --locked
+
+      - name: Prepare binary (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          cp target/release/azure-devops-boards-mcp-rust \
+             azure-devops-boards-mcp-rust-${{ matrix.name }}
+
+      - name: Prepare binary (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Copy-Item `
+            "target/release/azure-devops-boards-mcp-rust.exe" `
+            "azure-devops-boards-mcp-rust-${{ matrix.name }}.exe"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: azure-devops-boards-mcp-rust-${{ matrix.name }}
+          path: |
+            azure-devops-boards-mcp-rust-${{ matrix.name }}*
+
+  release:
+    name: Create draft GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: List downloaded files (debug)
+        run: ls -R dist
+
+      - name: Create draft release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          draft: true
+          prerelease: false
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: dist/**/azure-devops-boards-mcp-rust-*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
