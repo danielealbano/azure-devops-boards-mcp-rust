@@ -23,20 +23,19 @@ pub enum AzureError {
 pub struct AzureDevOpsClient {
     client: Client,
     credential: Arc<DefaultAzureCredential>,
-    pub organization: String,
-    pub project: String,
+}
+
+impl Default for AzureDevOpsClient {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl AzureDevOpsClient {
-    pub fn new(organization: String, project: String) -> Self {
+    pub fn new() -> Self {
         let credential = Arc::new(DefaultAzureCredential::default());
         let client = Client::new();
-        Self {
-            client,
-            credential,
-            organization,
-            project,
-        }
+        Self { client, credential }
     }
 
     async fn get_token(&self) -> Result<String, AzureError> {
@@ -46,6 +45,8 @@ impl AzureDevOpsClient {
 
     pub async fn request_with_content_type<T: DeserializeOwned>(
         &self,
+        organization: &str,
+        project: &str,
         method: Method,
         path: &str,
         body: Option<&(impl Serialize + ?Sized)>,
@@ -54,7 +55,7 @@ impl AzureDevOpsClient {
         let token = self.get_token().await?;
         let url = format!(
             "https://dev.azure.com/{}/{}/_apis/{}",
-            self.organization, self.project, path
+            organization, project, path
         );
 
         log::debug!("Request: {} {}", method, url);
@@ -95,12 +96,13 @@ impl AzureDevOpsClient {
     /// Make a request at the organization level (not project-scoped)
     pub async fn org_request<T: DeserializeOwned>(
         &self,
+        organization: &str,
         method: Method,
         path: &str,
         body: Option<&(impl Serialize + ?Sized)>,
     ) -> Result<T, AzureError> {
         let token = self.get_token().await?;
-        let url = format!("https://dev.azure.com/{}/_apis/{}", self.organization, path);
+        let url = format!("https://dev.azure.com/{}/_apis/{}", organization, path);
 
         log::debug!("ORG Request: {} {}", method, url);
         if let Some(b) = &body
@@ -141,6 +143,8 @@ impl AzureDevOpsClient {
     /// URL format: https://dev.azure.com/{organization}/{project}/{team}/_apis/{path}
     pub async fn team_request<T: DeserializeOwned>(
         &self,
+        organization: &str,
+        project: &str,
         method: Method,
         team: &str,
         path: &str,
@@ -149,7 +153,7 @@ impl AzureDevOpsClient {
         let token = self.get_token().await?;
         let url = format!(
             "https://dev.azure.com/{}/{}/{}/_apis/{}",
-            self.organization, self.project, team, path
+            organization, project, team, path
         );
 
         log::debug!("TEAM Request: {} {}", method, url);
@@ -189,40 +193,65 @@ impl AzureDevOpsClient {
 
     pub async fn request<T: DeserializeOwned>(
         &self,
+        organization: &str,
+        project: &str,
         method: Method,
         path: &str,
         body: Option<&(impl Serialize + ?Sized)>,
     ) -> Result<T, AzureError> {
-        self.request_with_content_type(method, path, body, "application/json")
-            .await
+        self.request_with_content_type(
+            organization,
+            project,
+            method,
+            path,
+            body,
+            "application/json",
+        )
+        .await
     }
 
-    pub async fn get<T: DeserializeOwned>(&self, path: &str) -> Result<T, AzureError> {
-        self.request(Method::GET, path, None::<&String>).await
+    pub async fn get<T: DeserializeOwned>(
+        &self,
+        organization: &str,
+        project: &str,
+        path: &str,
+    ) -> Result<T, AzureError> {
+        self.request(organization, project, Method::GET, path, None::<&String>)
+            .await
     }
 
     pub async fn post<T: DeserializeOwned>(
         &self,
+        organization: &str,
+        project: &str,
         path: &str,
         body: &(impl Serialize + ?Sized),
     ) -> Result<T, AzureError> {
-        self.request(Method::POST, path, Some(body)).await
+        self.request(organization, project, Method::POST, path, Some(body))
+            .await
     }
 
     pub async fn patch<T: DeserializeOwned>(
         &self,
+        organization: &str,
+        project: &str,
         path: &str,
         body: &(impl Serialize + ?Sized),
     ) -> Result<T, AzureError> {
-        self.request(Method::PATCH, path, Some(body)).await
+        self.request(organization, project, Method::PATCH, path, Some(body))
+            .await
     }
 
     pub async fn post_patch<T: DeserializeOwned>(
         &self,
+        organization: &str,
+        project: &str,
         path: &str,
         body: &(impl Serialize + ?Sized),
     ) -> Result<T, AzureError> {
         self.request_with_content_type(
+            organization,
+            project,
             Method::POST,
             path,
             Some(body),
@@ -233,10 +262,14 @@ impl AzureDevOpsClient {
 
     pub async fn patch_patch<T: DeserializeOwned>(
         &self,
+        organization: &str,
+        project: &str,
         path: &str,
         body: &(impl Serialize + ?Sized),
     ) -> Result<T, AzureError> {
         self.request_with_content_type(
+            organization,
+            project,
             Method::PATCH,
             path,
             Some(body),
@@ -247,13 +280,15 @@ impl AzureDevOpsClient {
 
     pub async fn post_binary<T: DeserializeOwned>(
         &self,
+        organization: &str,
+        project: &str,
         path: &str,
         body: Vec<u8>,
     ) -> Result<T, AzureError> {
         let token = self.get_token().await?;
         let url = format!(
             "https://dev.azure.com/{}/{}/_apis/{}",
-            self.organization, self.project, path
+            organization, project, path
         );
 
         let response = self
@@ -274,11 +309,16 @@ impl AzureDevOpsClient {
         Ok(data)
     }
 
-    pub async fn get_binary(&self, path: &str) -> Result<Vec<u8>, AzureError> {
+    pub async fn get_binary(
+        &self,
+        organization: &str,
+        project: &str,
+        path: &str,
+    ) -> Result<Vec<u8>, AzureError> {
         let token = self.get_token().await?;
         let url = format!(
             "https://dev.azure.com/{}/{}/_apis/{}",
-            self.organization, self.project, path
+            organization, project, path
         );
 
         let response = self.client.get(&url).bearer_auth(token).send().await?;
