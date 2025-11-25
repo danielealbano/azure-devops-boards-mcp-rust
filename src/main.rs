@@ -15,14 +15,6 @@ struct Args {
     /// Port to run the server on
     #[arg(long, default_value_t = 3000)]
     port: u16,
-
-    /// Azure DevOps Organization
-    #[arg(long, env = "AZDO_ORGANIZATION")]
-    organization: String,
-
-    /// Azure DevOps Project
-    #[arg(long, env = "AZDO_PROJECT")]
-    project: String,
 }
 
 #[tokio::main]
@@ -30,7 +22,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
     let args = Args::parse();
 
-    let client = AzureDevOpsClient::new(args.organization, args.project);
+    let client = AzureDevOpsClient::new();
     let mcp_server = AzureMcpServer::new(client);
 
     if args.server {
