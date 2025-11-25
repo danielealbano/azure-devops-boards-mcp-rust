@@ -170,7 +170,6 @@ struct QueryWorkItemsArgs {
 
 #[derive(Deserialize, JsonSchema)]
 struct CreateWorkItemArgs {
-    // Azure DevOps context
     /// Azure DevOps organization name
     organization: String,
     /// Azure DevOps project name
@@ -285,7 +284,7 @@ struct UpdateWorkItemArgs {
     #[serde(default)]
     title: Option<String>,
 
-    /// Work item description (HTML supported)
+    /// Work item description (Basic HTML supported)
     #[serde(default)]
     description: Option<String>,
 
