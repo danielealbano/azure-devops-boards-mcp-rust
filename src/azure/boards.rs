@@ -146,34 +146,42 @@ pub struct BoardListResponse {
 }
 
 /// List all teams in the project
-pub async fn list_teams(client: &AzureDevOpsClient) -> Result<Vec<Team>, AzureError> {
+pub async fn list_teams(
+    client: &AzureDevOpsClient,
+    organization: &str,
+    project: &str,
+) -> Result<Vec<Team>, AzureError> {
     // Teams API: https://dev.azure.com/{organization}/_apis/projects/{project}/teams
-    let path = format!("projects/{}/teams?api-version=7.1", client.project);
+    let path = format!("projects/{}/teams?api-version=7.1", project);
     let response: TeamListResponse = client
-        .org_request(Method::GET, &path, None::<&String>)
+        .org_request(organization, Method::GET, &path, None::<&String>)
         .await?;
 
     Ok(response.value)
 }
 
 /// Get a specific team by ID or name
-pub async fn get_team(client: &AzureDevOpsClient, team_id: &str) -> Result<Team, AzureError> {
+pub async fn get_team(
+    client: &AzureDevOpsClient,
+    organization: &str,
+    project: &str,
+    team_id: &str,
+) -> Result<Team, AzureError> {
     // Team API: https://dev.azure.com/{organization}/_apis/projects/{project}/teams/{teamId}
-    let path = format!(
-        "projects/{}/teams/{}?api-version=7.1",
-        client.project, team_id
-    );
+    let path = format!("projects/{}/teams/{}?api-version=7.1", project, team_id);
     client
-        .org_request(Method::GET, &path, None::<&String>)
+        .org_request(organization, Method::GET, &path, None::<&String>)
         .await
 }
 
 /// List all work item types (Stories, Epics, Features, Bugs, etc.)
 pub async fn list_work_item_types(
     client: &AzureDevOpsClient,
+    organization: &str,
+    project: &str,
 ) -> Result<Vec<WorkItemType>, AzureError> {
     let path = "wit/workitemtypes?api-version=7.1";
-    let response: WorkItemTypeListResponse = client.get(path).await?;
+    let response: WorkItemTypeListResponse = client.get(organization, project, path).await?;
     Ok(response.value)
 }
 
@@ -181,12 +189,21 @@ pub async fn list_work_item_types(
 /// Note: In Azure DevOps, boards are team-specific Kanban boards
 pub async fn list_boards(
     client: &AzureDevOpsClient,
+    organization: &str,
+    project: &str,
     team_id: &str,
 ) -> Result<Vec<BoardSummary>, AzureError> {
     // Team-specific boards: https://dev.azure.com/{org}/{project}/{team}/_apis/work/boards
     let path = "work/boards?api-version=7.1";
     let response: BoardListResponse = client
-        .team_request(Method::GET, team_id, path, None::<&String>)
+        .team_request(
+            organization,
+            project,
+            Method::GET,
+            team_id,
+            path,
+            None::<&String>,
+        )
         .await?;
     Ok(response.value)
 }
@@ -194,12 +211,21 @@ pub async fn list_boards(
 /// Get a specific board (requires team context)
 pub async fn get_board(
     client: &AzureDevOpsClient,
+    organization: &str,
+    project: &str,
     team_id: &str,
     board_id: &str,
 ) -> Result<BoardDetail, AzureError> {
     // Team-specific board: https://dev.azure.com/{org}/{project}/{team}/_apis/work/boards/{boardId}
     let path = format!("work/boards/{}?api-version=7.1", board_id);
     client
-        .team_request(Method::GET, team_id, &path, None::<&String>)
+        .team_request(
+            organization,
+            project,
+            Method::GET,
+            team_id,
+            &path,
+            None::<&String>,
+        )
         .await
 }
