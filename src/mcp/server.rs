@@ -653,8 +653,12 @@ impl AzureMcpServer {
             data: None,
         })?;
 
+        // Convert to JSON value, simplify, then serialize
+        let mut json_value = serde_json::to_value(&work_item).unwrap();
+        simplify_work_item_json(&mut json_value);
+
         Ok(CallToolResult::success(vec![Content::text(
-            compact_llm::to_compact_string(&work_item).unwrap(),
+            compact_llm::to_compact_string(&json_value).unwrap(),
         )]))
     }
 
@@ -879,8 +883,12 @@ impl AzureMcpServer {
             })?;
         }
 
+        // Convert to JSON value, simplify, then serialize
+        let mut json_value = serde_json::to_value(&work_item).unwrap();
+        simplify_work_item_json(&mut json_value);
+
         Ok(CallToolResult::success(vec![Content::text(
-            compact_llm::to_compact_string(&work_item).unwrap(),
+            compact_llm::to_compact_string(&json_value).unwrap(),
         )]))
     }
 
@@ -1321,8 +1329,12 @@ impl AzureMcpServer {
             data: None,
         })?;
 
+        // Convert to JSON value, simplify, then serialize
+        let mut json_value = serde_json::to_value(&work_item).unwrap();
+        simplify_work_item_json(&mut json_value);
+
         Ok(CallToolResult::success(vec![Content::text(
-            compact_llm::to_compact_string(&work_item).unwrap(),
+            compact_llm::to_compact_string(&json_value).unwrap(),
         )]))
     }
 
