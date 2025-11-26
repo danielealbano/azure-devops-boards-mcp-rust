@@ -31,10 +31,12 @@ pub struct WorkItem {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CommentListResponse {
+    #[serde(rename = "totalCount")]
+    pub total_count: u32,
+    #[serde(rename = "count")]
     pub count: u32,
-    pub value: Vec<Comment>,
-    #[serde(rename = "continuationToken")]
-    pub continuation_token: Option<String>,
+    #[serde(rename = "comments")]
+    pub comments: Vec<Comment>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
