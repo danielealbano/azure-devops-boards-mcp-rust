@@ -54,15 +54,7 @@ pub async fn get_comments(
         );
 
         if n > 0 {
-            let remaining = n as usize - all_comments.len();
-            if remaining == 0 {
-                break;
-            }
-            let top = if remaining > 200 { 200 } else { remaining };
-            path.push_str(&format!("&top={}", top));
-        } else if n == -1 {
-            // Fetch max page size when getting all
-            path.push_str("&top=200");
+            path.push_str(&format!("&$top={}", n));
         }
 
         if let Some(token) = &continuation_token {
