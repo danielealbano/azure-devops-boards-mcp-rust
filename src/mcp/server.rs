@@ -1,5 +1,6 @@
 use crate::azure::client::AzureDevOpsClient;
 use crate::azure::{boards, work_items};
+use crate::compact_llm;
 use rmcp::{
     ErrorData as McpError,
     handler::server::router::tool::ToolRouter,
@@ -525,7 +526,7 @@ impl AzureMcpServer {
             })?;
 
         Ok(CallToolResult::success(vec![Content::text(
-            serde_json::to_string_pretty(&teams).unwrap(),
+            compact_llm::to_compact_string(&teams).unwrap(),
         )]))
     }
 
@@ -552,7 +553,7 @@ impl AzureMcpServer {
         })?;
 
         Ok(CallToolResult::success(vec![Content::text(
-            serde_json::to_string_pretty(&team).unwrap(),
+            compact_llm::to_compact_string(&team).unwrap(),
         )]))
     }
 
@@ -572,7 +573,7 @@ impl AzureMcpServer {
                 })?;
 
         Ok(CallToolResult::success(vec![Content::text(
-            serde_json::to_string_pretty(&types).unwrap(),
+            compact_llm::to_compact_string(&types).unwrap(),
         )]))
     }
 
@@ -599,7 +600,7 @@ impl AzureMcpServer {
         })?;
 
         Ok(CallToolResult::success(vec![Content::text(
-            serde_json::to_string_pretty(&boards).unwrap(),
+            compact_llm::to_compact_string(&boards).unwrap(),
         )]))
     }
 
@@ -628,7 +629,7 @@ impl AzureMcpServer {
         })?;
 
         Ok(CallToolResult::success(vec![Content::text(
-            serde_json::to_string_pretty(&board).unwrap(),
+            compact_llm::to_compact_string(&board).unwrap(),
         )]))
     }
 
@@ -657,7 +658,7 @@ impl AzureMcpServer {
         simplify_work_item_json(&mut json_value);
 
         Ok(CallToolResult::success(vec![Content::text(
-            serde_json::to_string_pretty(&json_value).unwrap(),
+            compact_llm::to_compact_string(&json_value).unwrap(),
         )]))
     }
 
@@ -689,7 +690,7 @@ impl AzureMcpServer {
         simplify_work_item_json(&mut json_value);
 
         Ok(CallToolResult::success(vec![Content::text(
-            serde_json::to_string_pretty(&json_value).unwrap(),
+            compact_llm::to_compact_string(&json_value).unwrap(),
         )]))
     }
 
@@ -887,7 +888,7 @@ impl AzureMcpServer {
         simplify_work_item_json(&mut json_value);
 
         Ok(CallToolResult::success(vec![Content::text(
-            serde_json::to_string_pretty(&json_value).unwrap(),
+            compact_llm::to_compact_string(&json_value).unwrap(),
         )]))
     }
 
@@ -925,7 +926,7 @@ impl AzureMcpServer {
         })?;
 
         Ok(CallToolResult::success(vec![Content::text(
-            serde_json::to_string_pretty(&attachment).unwrap(),
+            compact_llm::to_compact_string(&attachment).unwrap(),
         )]))
     }
 
@@ -1176,7 +1177,7 @@ impl AzureMcpServer {
         simplify_work_item_json(&mut json_value);
 
         Ok(CallToolResult::success(vec![Content::text(
-            serde_json::to_string_pretty(&json_value).unwrap(),
+            compact_llm::to_compact_string(&json_value).unwrap(),
         )]))
     }
 
@@ -1333,7 +1334,7 @@ impl AzureMcpServer {
         simplify_work_item_json(&mut json_value);
 
         Ok(CallToolResult::success(vec![Content::text(
-            serde_json::to_string_pretty(&json_value).unwrap(),
+            compact_llm::to_compact_string(&json_value).unwrap(),
         )]))
     }
 
@@ -1363,7 +1364,7 @@ impl AzureMcpServer {
         })?;
 
         Ok(CallToolResult::success(vec![Content::text(
-            serde_json::to_string_pretty(&result).unwrap(),
+            compact_llm::to_compact_string(&result).unwrap(),
         )]))
     }
 
@@ -1407,7 +1408,7 @@ impl AzureMcpServer {
         })?;
 
         Ok(CallToolResult::success(vec![Content::text(
-            serde_json::to_string_pretty(&result).unwrap(),
+            compact_llm::to_compact_string(&result).unwrap(),
         )]))
     }
 }
