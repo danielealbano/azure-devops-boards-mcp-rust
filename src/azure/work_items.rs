@@ -58,7 +58,8 @@ pub async fn get_comments(
             work_item_id
         );
 
-        if n > 0 {
+        // Only set $top on the first request (not with continuation tokens)
+        if n > 0 && continuation_token.is_none() {
             path.push_str(&format!("&$top={}", n));
         }
 
