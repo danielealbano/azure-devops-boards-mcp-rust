@@ -1,4 +1,4 @@
-# Azure DevOps MCP Server
+# MCP for Azure DevOps Boards
 
 [![CI - PR - Build & Test](https://github.com/danielealbano/azure-devops-boards-mcp-rust/actions/workflows/ci-pr-build-and-test.yml/badge.svg)](https://github.com/danielealbano/azure-devops-boards-mcp-rust/actions/workflows/ci-pr-build-and-test.yml)
 [![CD - Tag - Build & Release](https://github.com/danielealbano/azure-devops-boards-mcp-rust/actions/workflows/cd-tag-build-and-release.yml/badge.svg)](https://github.com/danielealbano/azure-devops-boards-mcp-rust/actions/workflows/cd-tag-build-and-release.yml)
@@ -19,10 +19,10 @@ A Model Context Protocol (MCP) server for interacting with Azure DevOps Boards a
 
 ```bash
 brew tap danielealbano/mcp-tools
-brew install azure-devops-boards-mcp-rust
+brew install mcp-for-azure-devops-boards
 ```
 
-The path to the binary will be `/opt/homebrew/bin/azure-devops-boards-mcp-rust`.
+The path to the binary will be `/opt/homebrew/bin/mcp-for-azure-devops-boards`.
 
 Check out the section [MCP Configuration](#mcp-configuration) for how to configure your preferred AI (MCP) client.
 
@@ -69,7 +69,7 @@ az login
 This is the standard mode for MCP clients (like Claude Desktop or Cursor). **This mode is preferred for security as it ensures no credentials are shared over the network.**
 
 ```bash
-path/to/azure-devops-boards-mcp-rust
+path/to/mcp-for-azure-devops-boards
 ```
 
 ### HTTP Server Mode
@@ -77,7 +77,7 @@ path/to/azure-devops-boards-mcp-rust
 You can also run it as an HTTP server (SSE). **Note that in this mode, the server listens on `0.0.0.0` (all interfaces).**
 
 ```bash
-path/to/azure-devops-boards-mcp-rust --server --port 3000
+path/to/mcp-for-azure-devops-boards --server --port 3000
 ```
 
 ### MCP Configuration
@@ -92,7 +92,7 @@ Add the following to your `claude_desktop_config.json`:
 {
   "mcpServers": {
     "azure-devops-boards": {
-      "command": "path/to/azure-devops-boards-mcp-rust"
+      "command": "path/to/mcp-for-azure-devops-boards"
     }
   }
 }
