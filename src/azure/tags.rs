@@ -22,10 +22,8 @@ pub async fn list_tags(
     client: &AzureDevOpsClient,
     organization: &str,
     project: &str,
-) -> Result<Vec<String>, AzureError> {
+) -> Result<Vec<TagDefinition>, AzureError> {
     let path = "wit/tags?api-version=7.1";
     let response: TagListResponse = client.get(organization, project, path).await?;
-
-    // Extract just the tag names
-    Ok(response.value.into_iter().map(|tag| tag.name).collect())
+    Ok(response.value)
 }

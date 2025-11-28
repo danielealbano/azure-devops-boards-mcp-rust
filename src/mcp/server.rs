@@ -711,13 +711,16 @@ impl AzureMcpServer {
         args: Parameters<ListTagsArgs>,
     ) -> Result<CallToolResult, McpError> {
         log::info!("Tool invoked: azure_devops_list_tags");
-        let tag_names = tags::list_tags(&self.client, &args.0.organization, &args.0.project)
+        let tags = tags::list_tags(&self.client, &args.0.organization, &args.0.project)
             .await
             .map_err(|e| McpError {
                 code: ErrorCode(-32000),
                 message: e.to_string().into(),
                 data: None,
             })?;
+
+        // Extract just the tag names for compact response
+        let tag_names: Vec<String> = tags.into_iter().map(|tag| tag.name).collect();
 
         Ok(CallToolResult::success(vec![Content::text(
             compact_llm::to_compact_string(&tag_names).unwrap(),
