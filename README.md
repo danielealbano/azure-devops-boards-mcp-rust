@@ -155,6 +155,8 @@ The server exposes the following tools for MCP clients:
     -   **Required**: `organization`, `project`, `team_id`, `board_id`
 -   **`azdo_list_work_item_types`**: List all available work item types in the project.
     -   **Required**: `organization`, `project`
+-   **`azdo_list_tags`**: List all tags in use in the project.
+    -   **Required**: `organization`, `project`
 
 #### Attachments
 
