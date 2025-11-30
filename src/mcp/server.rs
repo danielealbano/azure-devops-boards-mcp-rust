@@ -173,6 +173,15 @@ fn simplify_work_item_json(value: &mut Value) {
                             }
                         }
 
+                        // Abbreviate Type field to just first letter
+                        if final_key == "Type" {
+                            if let Value::String(type_val) = &val {
+                                if let Some(first_char) = type_val.chars().next() {
+                                    val = Value::String(first_char.to_string());
+                                }
+                            }
+                        }
+
                         // Only insert if not already present (prefer existing values)
                         if !simplified_fields.contains_key(&final_key) {
                             simplified_fields.insert(final_key, val);
