@@ -506,7 +506,7 @@ struct CreateWorkItemArgs {
     #[serde(default)]
     area_path: Option<String>,
 
-    /// Iteration path (e.g., "MyProject\\Sprint 1"), use azdo_team_get_current_iteration to get the current iteration
+    /// Iteration path (e.g., "MyProject\\Sprint 1"), use azdo_get_team_current_iteration to get the current iteration
     #[serde(default)]
     iteration_path: Option<String>,
 
@@ -946,12 +946,12 @@ impl AzureMcpServer {
     }
 
     #[tool(description = "Get current iteration/sprint for team")]
-    async fn azdo_team_get_current_iteration(
+    async fn azdo_get_team_current_iteration(
         &self,
         args: Parameters<GetTeamCurrentIterationArgs>,
     ) -> Result<CallToolResult, McpError> {
         log::info!(
-            "Tool invoked: azdo_team_get_current_iteration(team_id={})",
+            "Tool invoked: azdo_get_team_current_iteration(team_id={})",
             args.0.team_id
         );
 
@@ -989,12 +989,12 @@ impl AzureMcpServer {
     }
 
     #[tool(description = "Get all iterations/sprints for team")]
-    async fn azdo_team_get_iterations(
+    async fn azdo_get_team_iterations(
         &self,
         args: Parameters<GetTeamIterationsArgs>,
     ) -> Result<CallToolResult, McpError> {
         log::info!(
-            "Tool invoked: azdo_team_get_iterations(team_id={})",
+            "Tool invoked: azdo_get_team_iterations(team_id={})",
             args.0.team_id
         );
 
@@ -1040,11 +1040,14 @@ impl AzureMcpServer {
     }
 
     #[tool(description = "List boards")]
-    async fn azdo_list_boards(
+    async fn azdo_list_team_boards(
         &self,
         args: Parameters<ListBoardsArgs>,
     ) -> Result<CallToolResult, McpError> {
-        log::info!("Tool invoked: azdo_list_boards(team_id={})", args.0.team_id);
+        log::info!(
+            "Tool invoked: azdo_list_team_boards(team_id={})",
+            args.0.team_id
+        );
         let boards = boards::list_boards(
             &self.client,
             &args.0.organization,
@@ -1067,12 +1070,12 @@ impl AzureMcpServer {
     }
 
     #[tool(description = "Get board details")]
-    async fn azdo_get_board(
+    async fn azdo_get_team_board(
         &self,
         args: Parameters<GetBoardArgs>,
     ) -> Result<CallToolResult, McpError> {
         log::info!(
-            "Tool invoked: azdo_get_board(team_id={}, board_id={})",
+            "Tool invoked: azdo_get_team_board(team_id={}, board_id={})",
             args.0.team_id,
             args.0.board_id
         );
@@ -1168,12 +1171,12 @@ impl AzureMcpServer {
     }
 
     #[tool(description = "Query work items using WIQL")]
-    async fn azdo_query_work_items_wiql(
+    async fn azdo_query_work_items_by_wiql(
         &self,
         args: Parameters<QueryWorkItemsArgsWiql>,
     ) -> Result<CallToolResult, McpError> {
         log::info!(
-            "Tool invoked: azdo_query_work_items_wiql(query={})",
+            "Tool invoked: azdo_query_work_items_by_wiql(query={})",
             args.0.query
         );
         let items = work_items::query_work_items(
@@ -1423,7 +1426,7 @@ impl AzureMcpServer {
         }
 
         // Iteration filter
-        if let Some(iteration) = &args.0.iteration {
+        if let Some(iteration) = &args.0.iteration_path {
             conditions.push(format!(
                 "[System.IterationPath] UNDER '{}'",
                 iteration.replace("'", "''")
