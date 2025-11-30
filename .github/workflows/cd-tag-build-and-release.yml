@@ -40,16 +40,6 @@ jobs:
       - name: Build (release)
         run: cargo build --release --locked
 
-      - name: Strip debug info from binary (Unix)
-        if: runner.os != 'Windows'
-        run: |
-          strip target/release/mcp-for-azure-devops-boards || true
-
-      - name: Strip debug info from binary (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          llvm-strip target/release/mcp-for-azure-devops-boards.exe
-
       - name: Prepare binary (Unix)
         if: runner.os != 'Windows'
         run: |
