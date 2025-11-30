@@ -803,7 +803,7 @@ impl AzureMcpServer {
         }
     }
 
-    #[tool(description = "List all teams in the project")]
+    #[tool(description = "List teams in the project")]
     async fn azdo_list_teams(
         &self,
         args: Parameters<ListTeamsArgs>,
@@ -825,7 +825,7 @@ impl AzureMcpServer {
         )]))
     }
 
-    #[tool(description = "List all AzDO organizations")]
+    #[tool(description = "List AzDO organizations")]
     async fn azdo_list_organizations(
         &self,
         _args: Parameters<ListOrganizationsArgs>,
@@ -858,7 +858,7 @@ impl AzureMcpServer {
         )]))
     }
 
-    #[tool(description = "List all projects in an organization")]
+    #[tool(description = "List projects in an organization")]
     async fn azdo_list_projects(
         &self,
         args: Parameters<ListProjectsArgs>,
@@ -904,7 +904,7 @@ impl AzureMcpServer {
         )]))
     }
 
-    #[tool(description = "List all work item types (Stories, Epics, Features, Bugs, etc.)")]
+    #[tool(description = "List work item types")]
     async fn azdo_list_work_item_types(
         &self,
         args: Parameters<ListWorkItemTypesArgs>,
@@ -927,7 +927,7 @@ impl AzureMcpServer {
         )]))
     }
 
-    #[tool(description = "List all tags")]
+    #[tool(description = "List tags")]
     async fn azdo_list_tags(
         &self,
         args: Parameters<ListTagsArgs>,
@@ -1005,7 +1005,7 @@ impl AzureMcpServer {
         )]))
     }
 
-    #[tool(description = "Get a work item by ID")]
+    #[tool(description = "Get work item by ID")]
     async fn azdo_get_work_item(
         &self,
         args: Parameters<GetWorkItemArgs>,
@@ -1077,7 +1077,7 @@ impl AzureMcpServer {
         Ok(CallToolResult::success(vec![Content::text(csv_output)]))
     }
 
-    #[tool(description = "Query work items using WIQL (Work Item Query Language)")]
+    #[tool(description = "Query work items using WIQL")]
     async fn azdo_query_work_items_wiql(
         &self,
         args: Parameters<QueryWorkItemsArgsWiql>,
