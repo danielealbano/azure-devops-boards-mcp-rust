@@ -1,5 +1,5 @@
 use crate::azure::client::AzureDevOpsClient;
-use crate::azure::{boards, organizations, projects, tags, work_items};
+use crate::azure::{boards, iterations, organizations, projects, tags, work_items};
 use crate::compact_llm;
 use once_cell::sync::Lazy;
 use regex::Regex;
@@ -402,6 +402,30 @@ struct GetTeamArgs {
     #[serde(deserialize_with = "deserialize_non_empty_string")]
     organization: String,
     /// AzDO project name
+    #[serde(deserialize_with = "deserialize_non_empty_string")]
+    project: String,
+    /// Team ID or name
+    team_id: String,
+}
+
+#[derive(Deserialize, JsonSchema)]
+struct GetTeamCurrentIterationArgs {
+    /// AzDO org
+    #[serde(deserialize_with = "deserialize_non_empty_string")]
+    organization: String,
+    /// AzDO project
+    #[serde(deserialize_with = "deserialize_non_empty_string")]
+    project: String,
+    /// Team ID or name
+    team_id: String,
+}
+
+#[derive(Deserialize, JsonSchema)]
+struct GetTeamIterationsArgs {
+    /// AzDO org
+    #[serde(deserialize_with = "deserialize_non_empty_string")]
+    organization: String,
+    /// AzDO project
     #[serde(deserialize_with = "deserialize_non_empty_string")]
     project: String,
     /// Team ID or name
@@ -947,6 +971,100 @@ impl AzureMcpServer {
         Ok(CallToolResult::success(vec![Content::text(
             compact_llm::to_compact_string(&tag_names).unwrap(),
         )]))
+    }
+
+    #[tool(description = "Get current iteration/sprint for team")]
+    async fn azdo_team_get_current_iteration(
+        &self,
+        args: Parameters<GetTeamCurrentIterationArgs>,
+    ) -> Result<CallToolResult, McpError> {
+        log::info!(
+            "Tool invoked: azdo_team_get_current_iteration(team_id={})",
+            args.0.team_id
+        );
+
+        let iteration = iterations::get_team_current_iteration(
+            &self.client,
+            &args.0.organization,
+            &args.0.project,
+            &args.0.team_id,
+        )
+        .await
+        .map_err(|e| McpError {
+            code: ErrorCode(-32000),
+            message: e.to_string().into(),
+            data: None,
+        })?;
+
+        // Extract dates without time (just YYYY-MM-DD)
+        let start_date = iteration
+            .attributes
+            .start_date
+            .as_ref()
+            .and_then(|d| d.split('T').next())
+            .unwrap_or("N/A");
+        let finish_date = iteration
+            .attributes
+            .finish_date
+            .as_ref()
+            .and_then(|d| d.split('T').next())
+            .unwrap_or("N/A");
+
+        // Return CSV format: name,start_date,finish_date
+        let csv_output = format!("{},{},{}", iteration.name, start_date, finish_date);
+
+        Ok(CallToolResult::success(vec![Content::text(csv_output)]))
+    }
+
+    #[tool(description = "Get all iterations/sprints for team")]
+    async fn azdo_team_get_iterations(
+        &self,
+        args: Parameters<GetTeamIterationsArgs>,
+    ) -> Result<CallToolResult, McpError> {
+        log::info!(
+            "Tool invoked: azdo_team_get_iterations(team_id={})",
+            args.0.team_id
+        );
+
+        let iterations = iterations::get_team_iterations(
+            &self.client,
+            &args.0.organization,
+            &args.0.project,
+            &args.0.team_id,
+        )
+        .await
+        .map_err(|e| McpError {
+            code: ErrorCode(-32000),
+            message: e.to_string().into(),
+            data: None,
+        })?;
+
+        // Convert to CSV format: name,timeframe,start_date,finish_date
+        let mut csv_lines = Vec::new();
+        for iteration in iterations {
+            let start_date = iteration
+                .attributes
+                .start_date
+                .as_ref()
+                .and_then(|d| d.split('T').next())
+                .unwrap_or("N/A");
+            let finish_date = iteration
+                .attributes
+                .finish_date
+                .as_ref()
+                .and_then(|d| d.split('T').next())
+                .unwrap_or("N/A");
+            let timeframe = iteration.attributes.time_frame.as_deref().unwrap_or("N/A");
+
+            csv_lines.push(format!(
+                "{},{},{},{}",
+                iteration.name, timeframe, start_date, finish_date
+            ));
+        }
+
+        let csv_output = csv_lines.join("\n");
+
+        Ok(CallToolResult::success(vec![Content::text(csv_output)]))
     }
 
     #[tool(description = "List boards")]
