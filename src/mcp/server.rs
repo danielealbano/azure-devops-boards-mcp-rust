@@ -247,6 +247,7 @@ fn work_items_to_csv(json_value: &Value) -> Result<String, String> {
         "ValueArea",
         "StackRank",
         "History",
+        "comments",
     ];
 
     // Normalize input to array
@@ -285,7 +286,7 @@ fn work_items_to_csv(json_value: &Value) -> Result<String, String> {
         let row: Vec<String> = active_fields
             .iter()
             .map(|field| {
-                item.get(field)
+                item.get(*field)
                     .and_then(|v| match v {
                         Value::String(s) => {
                             // Escape newlines and tabs for better LLM consumption
@@ -297,6 +298,10 @@ fn work_items_to_csv(json_value: &Value) -> Result<String, String> {
                         }
                         Value::Number(n) => Some(n.to_string()),
                         Value::Bool(b) => Some(b.to_string()),
+                        Value::Array(_) if *field == "comments" => {
+                            // Serialize comments array as compact JSON using compact_llm
+                            compact_llm::to_compact_string(v).ok()
+                        }
                         _ => None,
                     })
                     .unwrap_or_default()
