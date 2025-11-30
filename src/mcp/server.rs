@@ -508,7 +508,7 @@ struct CreateWorkItemArgs {
 
     /// Iteration path (e.g., "MyProject\\Sprint 1"), use azdo_team_get_current_iteration to get the current iteration
     #[serde(default)]
-    iteration: Option<String>,
+    iteration_path: Option<String>,
 
     /// Initial state (New, Active, Resolved, etc.)
     #[serde(default)]
@@ -611,7 +611,7 @@ struct UpdateWorkItemArgs {
 
     /// Iteration path (e.g., "MyProject\\Sprint 1")
     #[serde(default)]
-    iteration: Option<String>,
+    iteration_path: Option<String>,
 
     /// State (New, Active, Resolved, Closed, etc.)
     #[serde(default)]
@@ -719,7 +719,7 @@ struct QueryWorkItemsArgs {
 
     /// Iteration path to filter by (e.g., "MyProject\\Sprint 1"). Uses UNDER operator to include child paths.
     #[serde(default)]
-    iteration: Option<String>,
+    iteration_path: Option<String>,
 
     /// Filter by creation date (from). Format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ
     #[serde(default)]
@@ -1208,11 +1208,11 @@ impl AzureMcpServer {
         args: Parameters<CreateWorkItemArgs>,
     ) -> Result<CallToolResult, McpError> {
         log::info!(
-            "Tool invoked: azdo_create_work_item(work_item_type={}, title={}, area_path={:?}, iteration={:?})",
+            "Tool invoked: azdo_create_work_item(work_item_type={}, title={}, area_path={:?}, iteration_path={:?})",
             args.0.work_item_type,
             args.0.title,
             args.0.area_path,
-            args.0.iteration,
+            args.0.iteration_path,
         );
 
         // Build the field map
@@ -1234,7 +1234,7 @@ impl AzureMcpServer {
         if let Some(area_path) = &args.0.area_path {
             field_map.insert("System.AreaPath".to_string(), serde_json::json!(area_path));
         }
-        if let Some(iteration) = &args.0.iteration {
+        if let Some(iteration) = &args.0.iteration_path {
             field_map.insert(
                 "System.IterationPath".to_string(),
                 serde_json::json!(iteration),
@@ -1404,9 +1404,9 @@ impl AzureMcpServer {
         args: Parameters<QueryWorkItemsArgs>,
     ) -> Result<CallToolResult, McpError> {
         log::info!(
-            "Tool invoked: azdo_query_work_items(area_path={:?}, iteration={:?}, include_board_column={:?}, exclude_state={:?})",
+            "Tool invoked: azdo_query_work_items(area_path={:?}, iteration_path={:?}, include_board_column={:?}, exclude_state={:?})",
             args.0.area_path,
-            args.0.iteration,
+            args.0.iteration_path,
             args.0.include_board_column,
             args.0.exclude_state
         );
@@ -1647,7 +1647,7 @@ impl AzureMcpServer {
         if let Some(area_path) = &args.0.area_path {
             field_map.insert("System.AreaPath".to_string(), serde_json::json!(area_path));
         }
-        if let Some(iteration) = &args.0.iteration {
+        if let Some(iteration) = &args.0.iteration_path {
             field_map.insert(
                 "System.IterationPath".to_string(),
                 serde_json::json!(iteration),
