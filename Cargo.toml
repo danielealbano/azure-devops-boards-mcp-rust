@@ -1,7 +1,12 @@
 [package]
 name = "mcp-for-azure-devops-boards"
-version = "0.3.1"
+version = "0.4.0-dev"
 edition = "2024"
+authors = ["Daniele Albano <daniele.albano@gmail.com>"]
+license = "MIT"
+description = "A Model Context Protocol (MCP) server for interacting with Azure DevOps Boards and Work Items."
+homepage = "https://github.com/danielealbano/mcp-for-azure-devops-boards"
+repository = "https://github.com/danielealbano/mcp-for-azure-devops-boards"
 
 [dependencies]
 hyper = "1.5.1"
