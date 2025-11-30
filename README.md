@@ -102,7 +102,9 @@ Add the following to your `claude_desktop_config.json`:
 
 > *This software is currently in development. The tools and their parameters are subject to change.*
 
-The server exposes the following tools for MCP clients:
+The server exposes the following tools for MCP clients.
+
+The general structure of the tool names is `azdo_VERB_WHAT` (e.g., `azdo_list_teams`, `azdo_get_work_item`).
 
 #### Discovery
 
