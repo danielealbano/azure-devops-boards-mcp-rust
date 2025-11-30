@@ -1,4 +1,3 @@
-pub mod attachments;
 pub mod boards;
 pub mod client;
 pub mod iterations;
