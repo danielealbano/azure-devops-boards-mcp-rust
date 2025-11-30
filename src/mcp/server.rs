@@ -1,6 +1,7 @@
 use crate::azure::client::AzureDevOpsClient;
 use crate::azure::{boards, organizations, projects, tags, work_items};
 use crate::compact_llm;
+use once_cell::sync::Lazy;
 use regex::Regex;
 use rmcp::{
     ErrorData as McpError,
@@ -14,6 +15,14 @@ use rmcp::{
 };
 use serde_json::Value;
 use std::sync::Arc;
+
+// Static regex patterns for text cleaning (compiled once, reused many times)
+static RE_SPACES: Lazy<Regex> = Lazy::new(|| Regex::new(r" +").unwrap());
+static RE_NEWLINES: Lazy<Regex> = Lazy::new(|| Regex::new(r"\n+").unwrap());
+static RE_LEADING_WS: Lazy<Regex> = Lazy::new(|| Regex::new(r"\n[ ]+").unwrap());
+static RE_TRAILING_WS: Lazy<Regex> = Lazy::new(|| Regex::new(r"[ ]+\n").unwrap());
+static RE_DASHES: Lazy<Regex> = Lazy::new(|| Regex::new(r"-{3,}\n").unwrap());
+static RE_IMAGE: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?i)\[image\]").unwrap());
 
 /// Custom deserializer for non-empty strings
 fn deserialize_non_empty_string<'de, D>(deserializer: D) -> Result<String, D::Error>
@@ -137,33 +146,27 @@ fn simplify_work_item_json(value: &mut Value) {
                                     plain_text = plain_text.replace('─', "-");
 
                                     // Remove multiple consecutive spaces
-                                    let re_spaces = Regex::new(r" +").unwrap();
                                     plain_text =
-                                        re_spaces.replace_all(&plain_text, " ").to_string();
+                                        RE_SPACES.replace_all(&plain_text, " ").to_string();
 
                                     // Collapse multiple consecutive newlines into single newlines
-                                    let re_newlines = Regex::new(r"\n+").unwrap();
                                     plain_text =
-                                        re_newlines.replace_all(&plain_text, "\n").to_string();
+                                        RE_NEWLINES.replace_all(&plain_text, "\n").to_string();
 
                                     // Remove leading whitespace before newlines (spaces, tabs, etc.)
-                                    let re_leading = Regex::new(r"\n[ ]+").unwrap();
                                     plain_text =
-                                        re_leading.replace_all(&plain_text, "\n").to_string();
+                                        RE_LEADING_WS.replace_all(&plain_text, "\n").to_string();
 
                                     // Remove trailing whitespace before newlines (spaces, tabs, etc.)
-                                    let re_trailing = Regex::new(r"[ ]+\n").unwrap();
                                     plain_text =
-                                        re_trailing.replace_all(&plain_text, "\n").to_string();
+                                        RE_TRAILING_WS.replace_all(&plain_text, "\n").to_string();
 
                                     // Collapse 3+ dashes followed by newline to just 3 dashes + newline
-                                    let re_dashes = Regex::new(r"-{3,}\n").unwrap();
                                     plain_text =
-                                        re_dashes.replace_all(&plain_text, "---\n").to_string();
+                                        RE_DASHES.replace_all(&plain_text, "---\n").to_string();
 
                                     // Remove [Image] strings (case insensitive)
-                                    let re_image = Regex::new(r"(?i)\[image\]").unwrap();
-                                    plain_text = re_image.replace_all(&plain_text, "").to_string();
+                                    plain_text = RE_IMAGE.replace_all(&plain_text, "").to_string();
 
                                     val = Value::String(plain_text.trim().to_string());
                                 }

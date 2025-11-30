@@ -1255,6 +1255,7 @@ dependencies = [
  "hyper-util",
  "log",
  "mockall",
+ "once_cell",
  "regex",
  "reqwest",
  "rmcp",
