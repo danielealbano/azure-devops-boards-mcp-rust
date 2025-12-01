@@ -867,7 +867,24 @@ impl AzureMcpServer {
                 })?;
         }
 
-        let data = String::from_utf8(wtr.into_inner().unwrap()).unwrap();
+        wtr.flush().map_err(|e| McpError {
+            code: ErrorCode(-32000),
+            message: format!("Failed to flush CSV: {}", e).into(),
+            data: None,
+        })?;
+
+        let csv_bytes = wtr.into_inner().map_err(|e| McpError {
+            code: ErrorCode(-32000),
+            message: format!("Failed to get CSV bytes: {}", e).into(),
+            data: None,
+        })?;
+
+        let data = String::from_utf8(csv_bytes).map_err(|e| McpError {
+            code: ErrorCode(-32000),
+            message: format!("Failed to convert CSV to string: {}", e).into(),
+            data: None,
+        })?;
+
         Ok(CallToolResult::success(vec![Content::text(data)]))
     }
 
@@ -896,7 +913,24 @@ impl AzureMcpServer {
                 data: None,
             })?;
 
-        let data = String::from_utf8(wtr.into_inner().unwrap()).unwrap();
+        wtr.flush().map_err(|e| McpError {
+            code: ErrorCode(-32000),
+            message: format!("Failed to flush CSV: {}", e).into(),
+            data: None,
+        })?;
+
+        let csv_bytes = wtr.into_inner().map_err(|e| McpError {
+            code: ErrorCode(-32000),
+            message: format!("Failed to get CSV bytes: {}", e).into(),
+            data: None,
+        })?;
+
+        let data = String::from_utf8(csv_bytes).map_err(|e| McpError {
+            code: ErrorCode(-32000),
+            message: format!("Failed to convert CSV to string: {}", e).into(),
+            data: None,
+        })?;
+
         Ok(CallToolResult::success(vec![Content::text(data)]))
     }
 
