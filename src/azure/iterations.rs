@@ -54,22 +54,31 @@ pub async fn get_team_current_iteration(
         .ok_or_else(|| AzureError::ApiError("No current iteration found for this team".to_string()))
 }
 
-/// Get all iterations for a team
+/// Get all iterations for a team, optionally filtered by timeframe
 pub async fn get_team_iterations(
     client: &AzureDevOpsClient,
     organization: &str,
     project: &str,
     team_id: &str,
+    timeframe: Option<&str>,
 ) -> Result<Vec<TeamSettingsIteration>, AzureError> {
     // API: https://dev.azure.com/{org}/{project}/{team}/_apis/work/teamsettings/iterations?api-version=7.1
-    let path = "work/teamsettings/iterations?api-version=7.1";
+    let path = if let Some(tf) = timeframe {
+        format!(
+            "work/teamsettings/iterations?$timeframe={}&api-version=7.1",
+            tf
+        )
+    } else {
+        "work/teamsettings/iterations?api-version=7.1".to_string()
+    };
+
     let response: IterationListResponse = client
         .team_request(
             organization,
             project,
             Method::GET,
             team_id,
-            path,
+            &path,
             None::<&String>,
         )
         .await?;
