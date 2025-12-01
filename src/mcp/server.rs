@@ -1,5 +1,7 @@
 use crate::azure::client::AzureDevOpsClient;
-use crate::azure::{boards, iterations, organizations, projects, tags, work_items};
+use crate::azure::{
+    boards, classification_nodes, iterations, organizations, projects, tags, work_items,
+};
 use crate::compact_llm;
 use once_cell::sync::Lazy;
 use regex::Regex;
@@ -433,20 +435,37 @@ struct ListTeamMembersArgs {
 }
 
 #[derive(Deserialize, JsonSchema)]
-struct ListTeamMembersArgs {
+struct GetCurrentUserArgs {
+    // No parameters needed
+}
+
+#[derive(Deserialize, JsonSchema)]
+struct ListAreaPathsArgs {
     /// AzDO org name
     #[serde(deserialize_with = "deserialize_non_empty_string")]
     organization: String,
     /// AzDO project name
     #[serde(deserialize_with = "deserialize_non_empty_string")]
     project: String,
-    /// Team ID or name
-    team_id: String,
+    /// Optional parent path to traverse the tree (e.g., "Area1\SubArea1")
+    #[serde(default)]
+    parent_path: Option<String>,
 }
 
 #[derive(Deserialize, JsonSchema)]
-struct GetCurrentUserArgs {
-    // No parameters needed
+struct ListIterationPathsArgs {
+    /// AzDO org name
+    #[serde(deserialize_with = "deserialize_non_empty_string")]
+    organization: String,
+    /// AzDO project name
+    #[serde(deserialize_with = "deserialize_non_empty_string")]
+    project: String,
+    /// Optional team ID or name to get team-specific iterations
+    #[serde(default)]
+    team_id: Option<String>,
+    /// Optional timeframe filter: "current", "past", or "future" (only applies when team_id is provided)
+    #[serde(default)]
+    timeframe: Option<String>,
 }
 
 #[derive(Deserialize, JsonSchema)]
@@ -989,6 +1008,46 @@ impl AzureMcpServer {
         )]))
     }
 
+    #[tool(description = "List area paths for a project")]
+    async fn azdo_list_area_paths(
+        &self,
+        args: Parameters<ListAreaPathsArgs>,
+    ) -> Result<CallToolResult, McpError> {
+        log::info!("Tool invoked: azdo_list_area_paths");
+
+        let root_node = classification_nodes::list_area_paths(
+            &self.client,
+            &args.0.organization,
+            &args.0.project,
+            args.0.parent_path.as_deref(),
+            10, // depth
+        )
+        .await
+        .map_err(|e| McpError {
+            code: ErrorCode(-32000),
+            message: e.to_string().into(),
+            data: None,
+        })?;
+
+        // Flatten the tree into a list of paths
+        fn collect_paths(node: &classification_nodes::ClassificationNode, paths: &mut Vec<String>) {
+            paths.push(node.path.clone());
+            if let Some(children) = &node.children {
+                for child in children {
+                    collect_paths(child, paths);
+                }
+            }
+        }
+
+        let mut paths = Vec::new();
+        collect_paths(&root_node, &mut paths);
+
+        // Return as newline-separated list
+        Ok(CallToolResult::success(vec![Content::text(
+            paths.join("\n"),
+        )]))
+    }
+
     #[tool(description = "Get team details")]
     async fn azdo_get_team(
         &self,
@@ -1101,55 +1160,92 @@ impl AzureMcpServer {
         Ok(CallToolResult::success(vec![Content::text(csv_output)]))
     }
 
-    #[tool(description = "Get all iterations/sprints for team")]
-    async fn azdo_get_team_iterations(
+    #[tool(description = "List iteration paths for a project or team")]
+    async fn azdo_list_iteration_paths(
         &self,
-        args: Parameters<GetTeamIterationsArgs>,
+        args: Parameters<ListIterationPathsArgs>,
     ) -> Result<CallToolResult, McpError> {
-        log::info!(
-            "Tool invoked: azdo_get_team_iterations(team_id={})",
-            args.0.team_id
-        );
+        log::info!("Tool invoked: azdo_list_iteration_paths");
 
-        let iterations = iterations::get_team_iterations(
-            &self.client,
-            &args.0.organization,
-            &args.0.project,
-            &args.0.team_id,
-        )
-        .await
-        .map_err(|e| McpError {
-            code: ErrorCode(-32000),
-            message: e.to_string().into(),
-            data: None,
-        })?;
+        // If team_id is provided, use team-specific iterations
+        if let Some(team_id) = &args.0.team_id {
+            let iterations = iterations::get_team_iterations(
+                &self.client,
+                &args.0.organization,
+                &args.0.project,
+                team_id,
+                args.0.timeframe.as_deref(),
+            )
+            .await
+            .map_err(|e| McpError {
+                code: ErrorCode(-32000),
+                message: e.to_string().into(),
+                data: None,
+            })?;
 
-        // Convert to CSV format: name,timeframe,start_date,finish_date
-        let mut csv_lines = Vec::new();
-        for iteration in iterations {
-            let start_date = iteration
-                .attributes
-                .start_date
-                .as_ref()
-                .and_then(|d| d.split('T').next())
-                .unwrap_or("N/A");
-            let finish_date = iteration
-                .attributes
-                .finish_date
-                .as_ref()
-                .and_then(|d| d.split('T').next())
-                .unwrap_or("N/A");
-            let timeframe = iteration.attributes.time_frame.as_deref().unwrap_or("N/A");
+            // Convert to CSV format: name,timeframe,start_date,finish_date
+            let mut csv_lines = Vec::new();
+            for iteration in iterations {
+                let start_date = iteration
+                    .attributes
+                    .start_date
+                    .as_ref()
+                    .and_then(|d| d.split('T').next())
+                    .unwrap_or("N/A");
+                let finish_date = iteration
+                    .attributes
+                    .finish_date
+                    .as_ref()
+                    .and_then(|d| d.split('T').next())
+                    .unwrap_or("N/A");
+                let timeframe = iteration.attributes.time_frame.as_deref().unwrap_or("N/A");
 
-            csv_lines.push(format!(
-                "{},{},{},{}",
-                iteration.name, timeframe, start_date, finish_date
-            ));
+                csv_lines.push(format!(
+                    "{},{},{},{}",
+                    iteration.name, timeframe, start_date, finish_date
+                ));
+            }
+
+            Ok(CallToolResult::success(vec![Content::text(
+                csv_lines.join("\n"),
+            )]))
+        } else {
+            // Use project-level classification nodes
+            let root_node = classification_nodes::list_iteration_paths(
+                &self.client,
+                &args.0.organization,
+                &args.0.project,
+                None,
+                10, // depth
+            )
+            .await
+            .map_err(|e| McpError {
+                code: ErrorCode(-32000),
+                message: e.to_string().into(),
+                data: None,
+            })?;
+
+            // Flatten the tree into a list of paths
+            fn collect_paths(
+                node: &classification_nodes::ClassificationNode,
+                paths: &mut Vec<String>,
+            ) {
+                paths.push(node.path.clone());
+                if let Some(children) = &node.children {
+                    for child in children {
+                        collect_paths(child, paths);
+                    }
+                }
+            }
+
+            let mut paths = Vec::new();
+            collect_paths(&root_node, &mut paths);
+
+            // Return as newline-separated list
+            Ok(CallToolResult::success(vec![Content::text(
+                paths.join("\n"),
+            )]))
         }
-
-        let csv_output = csv_lines.join("\n");
-
-        Ok(CallToolResult::success(vec![Content::text(csv_output)]))
     }
 
     #[tool(description = "List boards")]
