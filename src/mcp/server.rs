@@ -421,11 +421,11 @@ struct GetTeamCurrentIterationArgs {
 }
 
 #[derive(Deserialize, JsonSchema)]
-struct GetTeamIterationsArgs {
-    /// AzDO org
+struct ListTeamMembersArgs {
+    /// AzDO org name
     #[serde(deserialize_with = "deserialize_non_empty_string")]
     organization: String,
-    /// AzDO project
+    /// AzDO project name
     #[serde(deserialize_with = "deserialize_non_empty_string")]
     project: String,
     /// Team ID or name
