@@ -98,26 +98,38 @@ fn extract_attribute_value(attr: &str, key: &str) -> Option<String> {
 }
 
 fn build_function_path(file_path: &Path, fn_name: &str) -> String {
-    // Convert file path to module path
-    // e.g., src/mcp/tools/teams/list_teams.rs -> crate::mcp::tools::teams::list_teams
-    // But since modules re-export functions, we use the parent module path
-    let path_str = file_path.to_str().unwrap();
-    let module_path = path_str
-        .strip_prefix("src/")
-        .unwrap_or(path_str)
-        .strip_suffix(".rs")
-        .unwrap_or(path_str)
-        .replace('/', "::");
+    // Convert file path to module path using components for cross-platform compatibility
+    let components: Vec<_> = file_path
+        .components()
+        .map(|c| c.as_os_str().to_str().unwrap())
+        .collect();
 
-    // Get the parent module path (everything before the last ::)
-    let parts: Vec<&str> = module_path.rsplitn(2, "::").collect();
-    if parts.len() == 2 {
-        // Use parent module + function name
-        format!("crate::{}::{}", parts[1], fn_name)
-    } else {
-        // Fallback to full path
-        format!("crate::{}::{}", module_path, fn_name)
+    // Find "src" component to anchor the module path
+    let src_pos = components
+        .iter()
+        .position(|&c| c == "src")
+        .expect("Path should contain 'src'");
+
+    // Extract parts after "src"
+    let mut module_parts: Vec<String> = components[src_pos + 1..]
+        .iter()
+        .map(|s| s.to_string())
+        .collect();
+
+    // Remove .rs extension from the last part
+    if let Some(last) = module_parts.last_mut() {
+        if last.ends_with(".rs") {
+            *last = last.trim_end_matches(".rs").to_string();
+        }
     }
+
+    // Construct the full module path to the file
+    let module_path = module_parts.join("::");
+
+    // The function is inside this module.
+    // We reference it as crate::module_path::fn_name
+    // This avoids relying on re-exports in parent modules
+    format!("crate::{}::{}", module_path, fn_name)
 }
 
 fn generate_tool_router_code(tools: &[ToolInfo]) -> String {
