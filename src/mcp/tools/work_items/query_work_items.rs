@@ -43,13 +43,13 @@ pub struct QueryWorkItemsArgs {
     #[serde(default)]
     pub state_change_date_to: Option<String>,
 
-    /// Filter by modified date (from). Format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ
+    /// Filter by changed date (from). Format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ
     #[serde(default)]
-    pub modified_date_from: Option<String>,
+    pub changed_date_from: Option<String>,
 
-    /// Filter by modified date (to). Format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ
+    /// Filter by changed date (to). Format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ
     #[serde(default)]
-    pub modified_date_to: Option<String>,
+    pub changed_date_to: Option<String>,
 
     /// Board columns to include (e.g., ["Active", "Resolved"])
     #[serde(default)]
