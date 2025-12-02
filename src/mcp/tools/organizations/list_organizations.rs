@@ -1,5 +1,5 @@
 use crate::azure::{client::AzureDevOpsClient, organizations};
-use crate::compact_llm;
+
 use mcp_tools_codegen::mcp_tool;
 use rmcp::{
     ErrorData as McpError,
@@ -40,6 +40,6 @@ pub async fn list_organizations(
     let org_names: Vec<String> = orgs.into_iter().map(|org| org.account_name).collect();
 
     Ok(CallToolResult::success(vec![Content::text(
-        compact_llm::to_compact_string(&org_names).unwrap(),
+        org_names.join(","),
     )]))
 }

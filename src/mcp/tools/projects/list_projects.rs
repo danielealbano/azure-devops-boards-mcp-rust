@@ -1,5 +1,5 @@
 use crate::azure::{client::AzureDevOpsClient, projects};
-use crate::compact_llm;
+
 use crate::mcp::tools::support::deserialize_non_empty_string;
 use mcp_tools_codegen::mcp_tool;
 use rmcp::{
@@ -37,6 +37,6 @@ pub async fn list_projects(
     let project_names: Vec<String> = projects.into_iter().map(|project| project.name).collect();
 
     Ok(CallToolResult::success(vec![Content::text(
-        compact_llm::to_compact_string(&project_names).unwrap(),
+        project_names.join(","),
     )]))
 }

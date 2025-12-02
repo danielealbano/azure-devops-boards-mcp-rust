@@ -1,5 +1,5 @@
 use crate::azure::{boards, client::AzureDevOpsClient};
-use crate::compact_llm;
+
 use crate::mcp::tools::support::deserialize_non_empty_string;
 use mcp_tools_codegen::mcp_tool;
 use rmcp::{
@@ -35,7 +35,8 @@ pub async fn get_team(
             data: None,
         })?;
 
-    Ok(CallToolResult::success(vec![Content::text(
-        compact_llm::to_compact_string(&team).unwrap(),
-    )]))
+    let description = team.description.unwrap_or_default();
+    let output = format!("{},{}", team.name, description);
+
+    Ok(CallToolResult::success(vec![Content::text(output)]))
 }
