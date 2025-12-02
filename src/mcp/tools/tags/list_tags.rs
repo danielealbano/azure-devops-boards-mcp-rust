@@ -1,5 +1,5 @@
 use crate::azure::{client::AzureDevOpsClient, tags};
-use crate::compact_llm;
+
 use crate::mcp::tools::support::deserialize_non_empty_string;
 use mcp_tools_codegen::mcp_tool;
 use rmcp::{
@@ -37,6 +37,6 @@ pub async fn list_tags(
     let tag_names: Vec<String> = tags.into_iter().map(|tag| tag.name).collect();
 
     Ok(CallToolResult::success(vec![Content::text(
-        compact_llm::to_compact_string(&tag_names).unwrap(),
+        tag_names.join(","),
     )]))
 }
