@@ -1,5 +1,6 @@
 use crate::azure::{client::AzureDevOpsClient, iterations};
 use crate::mcp::tools::support::deserialize_non_empty_string;
+use mcp_tools_codegen::mcp_tool;
 use rmcp::{
     ErrorData as McpError,
     model::{CallToolResult, Content, ErrorCode},
@@ -19,6 +20,10 @@ pub struct GetTeamCurrentIterationArgs {
     pub team_id: String,
 }
 
+#[mcp_tool(
+    name = "azdo_get_team_current_iteration",
+    description = "Get current iteration/sprint for team"
+)]
 pub async fn get_team_current_iteration(
     client: &AzureDevOpsClient,
     args: GetTeamCurrentIterationArgs,

@@ -1,6 +1,7 @@
 use crate::azure::{boards, client::AzureDevOpsClient};
 use crate::compact_llm;
 use crate::mcp::tools::support::deserialize_non_empty_string;
+use mcp_tools_codegen::mcp_tool;
 use rmcp::{
     ErrorData as McpError,
     model::{CallToolResult, Content, ErrorCode},
@@ -20,6 +21,7 @@ pub struct GetTeamArgs {
     pub team_id: String,
 }
 
+#[mcp_tool(name = "azdo_get_team", description = "Get team details")]
 pub async fn get_team(
     client: &AzureDevOpsClient,
     args: GetTeamArgs,

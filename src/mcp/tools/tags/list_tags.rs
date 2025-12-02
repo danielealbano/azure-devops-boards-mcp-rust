@@ -1,6 +1,7 @@
 use crate::azure::{client::AzureDevOpsClient, tags};
 use crate::compact_llm;
 use crate::mcp::tools::support::deserialize_non_empty_string;
+use mcp_tools_codegen::mcp_tool;
 use rmcp::{
     ErrorData as McpError,
     model::{CallToolResult, Content, ErrorCode},
@@ -18,6 +19,7 @@ pub struct ListTagsArgs {
     pub project: String,
 }
 
+#[mcp_tool(name = "azdo_list_tags", description = "List tags")]
 pub async fn list_tags(
     client: &AzureDevOpsClient,
     args: ListTagsArgs,

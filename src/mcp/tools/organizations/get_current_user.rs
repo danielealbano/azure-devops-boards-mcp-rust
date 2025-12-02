@@ -1,4 +1,5 @@
 use crate::azure::{client::AzureDevOpsClient, organizations};
+use mcp_tools_codegen::mcp_tool;
 use rmcp::{
     ErrorData as McpError,
     model::{CallToolResult, Content, ErrorCode},
@@ -7,10 +8,12 @@ use rmcp::{
 };
 
 #[derive(Deserialize, JsonSchema)]
-pub struct GetCurrentUserArgs {
-    // No parameters needed
-}
+pub struct GetCurrentUserArgs {}
 
+#[mcp_tool(
+    name = "azdo_get_current_user",
+    description = "Get current user profile"
+)]
 pub async fn get_current_user(
     client: &AzureDevOpsClient,
     _args: GetCurrentUserArgs,

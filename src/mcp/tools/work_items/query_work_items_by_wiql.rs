@@ -2,6 +2,7 @@ use crate::azure::{client::AzureDevOpsClient, work_items};
 use crate::mcp::tools::support::{
     deserialize_non_empty_string, simplify_work_item_json, work_items_to_csv,
 };
+use mcp_tools_codegen::mcp_tool;
 use rmcp::{
     ErrorData as McpError,
     model::{CallToolResult, Content, ErrorCode},
@@ -24,6 +25,10 @@ pub struct QueryWorkItemsArgsWiql {
     pub include_latest_n_comments: Option<i32>,
 }
 
+#[mcp_tool(
+    name = "azdo_query_work_items_by_wiql",
+    description = "Query work items using WIQL"
+)]
 pub async fn query_work_items_by_wiql(
     client: &AzureDevOpsClient,
     args: QueryWorkItemsArgsWiql,

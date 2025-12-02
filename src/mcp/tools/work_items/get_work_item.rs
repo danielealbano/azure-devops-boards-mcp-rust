@@ -2,6 +2,7 @@ use crate::azure::{client::AzureDevOpsClient, work_items};
 use crate::mcp::tools::support::{
     deserialize_non_empty_string, simplify_work_item_json, work_items_to_csv,
 };
+use mcp_tools_codegen::mcp_tool;
 use rmcp::{
     ErrorData as McpError,
     model::{CallToolResult, Content, ErrorCode},
@@ -24,6 +25,7 @@ pub struct GetWorkItemArgs {
     pub include_latest_n_comments: Option<i32>,
 }
 
+#[mcp_tool(name = "azdo_get_work_item", description = "Get work item by ID")]
 pub async fn get_work_item(
     client: &AzureDevOpsClient,
     args: GetWorkItemArgs,

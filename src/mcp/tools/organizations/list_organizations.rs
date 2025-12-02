@@ -1,5 +1,6 @@
 use crate::azure::{client::AzureDevOpsClient, organizations};
 use crate::compact_llm;
+use mcp_tools_codegen::mcp_tool;
 use rmcp::{
     ErrorData as McpError,
     model::{CallToolResult, Content, ErrorCode},
@@ -8,10 +9,9 @@ use rmcp::{
 };
 
 #[derive(Deserialize, JsonSchema)]
-pub struct ListOrganizationsArgs {
-    // No parameters needed
-}
+pub struct ListOrganizationsArgs {}
 
+#[mcp_tool(name = "azdo_list_organizations", description = "List organizations")]
 pub async fn list_organizations(
     client: &AzureDevOpsClient,
     _args: ListOrganizationsArgs,

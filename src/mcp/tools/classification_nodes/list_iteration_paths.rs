@@ -1,5 +1,6 @@
 use crate::azure::{classification_nodes, client::AzureDevOpsClient, iterations};
 use crate::mcp::tools::support::deserialize_non_empty_string;
+use mcp_tools_codegen::mcp_tool;
 use rmcp::{
     ErrorData as McpError,
     model::{CallToolResult, Content, ErrorCode},
@@ -23,6 +24,10 @@ pub struct ListIterationPathsArgs {
     pub timeframe: Option<String>,
 }
 
+#[mcp_tool(
+    name = "azdo_list_iteration_paths",
+    description = "List iteration paths for a project or team"
+)]
 pub async fn list_iteration_paths(
     client: &AzureDevOpsClient,
     args: ListIterationPathsArgs,
@@ -95,7 +100,7 @@ pub async fn list_iteration_paths(
         }
 
         Ok(CallToolResult::success(vec![Content::text(
-            csv_lines.join("\n"),
+            csv_lines.join(","),
         )]))
     } else {
         // Use project-level classification nodes
@@ -119,7 +124,7 @@ pub async fn list_iteration_paths(
 
         // Return as CSV format: path (single column for consistency)
         Ok(CallToolResult::success(vec![Content::text(
-            paths.join("\n"),
+            paths.join(","),
         )]))
     }
 }

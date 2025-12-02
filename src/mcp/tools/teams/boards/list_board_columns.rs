@@ -1,5 +1,6 @@
 use crate::azure::{boards, client::AzureDevOpsClient};
 use crate::mcp::tools::support::{board_columns_to_csv, deserialize_non_empty_string};
+use mcp_tools_codegen::mcp_tool;
 use rmcp::{
     ErrorData as McpError,
     model::{CallToolResult, Content, ErrorCode},
@@ -21,6 +22,7 @@ pub struct ListBoardColumnsArgs {
     pub board_id: String,
 }
 
+#[mcp_tool(name = "azdo_list_board_columns", description = "List board columns")]
 pub async fn list_board_columns(
     client: &AzureDevOpsClient,
     args: ListBoardColumnsArgs,

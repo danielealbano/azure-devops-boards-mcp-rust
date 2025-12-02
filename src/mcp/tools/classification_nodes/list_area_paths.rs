@@ -1,5 +1,6 @@
 use crate::azure::{classification_nodes, client::AzureDevOpsClient};
 use crate::mcp::tools::support::deserialize_non_empty_string;
+use mcp_tools_codegen::mcp_tool;
 use rmcp::{
     ErrorData as McpError,
     model::{CallToolResult, Content, ErrorCode},
@@ -20,6 +21,10 @@ pub struct ListAreaPathsArgs {
     pub parent_path: Option<String>,
 }
 
+#[mcp_tool(
+    name = "azdo_list_area_paths",
+    description = "List area paths for a project"
+)]
 pub async fn list_area_paths(
     client: &AzureDevOpsClient,
     args: ListAreaPathsArgs,
@@ -53,8 +58,8 @@ pub async fn list_area_paths(
     let mut paths = Vec::new();
     collect_paths(&root_node, &mut paths);
 
-    // Return as newline-separated list
+    // Return as comma-separated list
     Ok(CallToolResult::success(vec![Content::text(
-        paths.join("\n"),
+        paths.join(","),
     )]))
 }

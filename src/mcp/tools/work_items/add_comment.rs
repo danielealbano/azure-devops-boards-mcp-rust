@@ -1,6 +1,7 @@
 use crate::azure::{client::AzureDevOpsClient, work_items};
 use crate::compact_llm;
 use crate::mcp::tools::support::deserialize_non_empty_string;
+use mcp_tools_codegen::mcp_tool;
 use rmcp::{
     ErrorData as McpError,
     model::{CallToolResult, Content, ErrorCode},
@@ -22,6 +23,10 @@ pub struct AddCommentArgs {
     pub text: String,
 }
 
+#[mcp_tool(
+    name = "azdo_add_comment",
+    description = "Add a comment to a work item"
+)]
 pub async fn add_comment(
     client: &AzureDevOpsClient,
     args: AddCommentArgs,

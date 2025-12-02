@@ -1,6 +1,7 @@
 use crate::azure::{client::AzureDevOpsClient, work_items};
 use crate::compact_llm;
 use crate::mcp::tools::support::deserialize_non_empty_string;
+use mcp_tools_codegen::mcp_tool;
 use rmcp::{
     ErrorData as McpError,
     model::{CallToolResult, Content, ErrorCode},
@@ -24,6 +25,7 @@ pub struct LinkWorkItemsArgs {
     pub link_type: String,
 }
 
+#[mcp_tool(name = "azdo_link_work_items", description = "Link work items")]
 pub async fn link_work_items(
     client: &AzureDevOpsClient,
     args: LinkWorkItemsArgs,

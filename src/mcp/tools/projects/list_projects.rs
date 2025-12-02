@@ -1,6 +1,7 @@
 use crate::azure::{client::AzureDevOpsClient, projects};
 use crate::compact_llm;
 use crate::mcp::tools::support::deserialize_non_empty_string;
+use mcp_tools_codegen::mcp_tool;
 use rmcp::{
     ErrorData as McpError,
     model::{CallToolResult, Content, ErrorCode},
@@ -15,6 +16,10 @@ pub struct ListProjectsArgs {
     pub organization: String,
 }
 
+#[mcp_tool(
+    name = "azdo_list_projects",
+    description = "List projects in an organization"
+)]
 pub async fn list_projects(
     client: &AzureDevOpsClient,
     args: ListProjectsArgs,

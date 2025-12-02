@@ -1,6 +1,7 @@
 use crate::azure::{boards, client::AzureDevOpsClient};
 use crate::compact_llm;
 use crate::mcp::tools::support::deserialize_non_empty_string;
+use mcp_tools_codegen::mcp_tool;
 use rmcp::{
     ErrorData as McpError,
     model::{CallToolResult, Content, ErrorCode},
@@ -22,6 +23,10 @@ pub struct ListBoardRowsArgs {
     pub board_id: String,
 }
 
+#[mcp_tool(
+    name = "azdo_list_board_rows",
+    description = "List board rows (swimlanes)"
+)]
 pub async fn list_board_rows(
     client: &AzureDevOpsClient,
     args: ListBoardRowsArgs,
