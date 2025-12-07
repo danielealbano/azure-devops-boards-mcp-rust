@@ -3,6 +3,10 @@
 [![CI - PR - Build & Test](https://github.com/danielealbano/mcp-for-azure-devops-boards/actions/workflows/ci-pr-build-and-test.yml/badge.svg)](https://github.com/danielealbano/mcp-for-azure-devops-boards/actions/workflows/ci-pr-build-and-test.yml)
 [![CD - Tag - Build & Release](https://github.com/danielealbano/mcp-for-azure-devops-boards/actions/workflows/cd-tag-build-and-release.yml/badge.svg)](https://github.com/danielealbano/mcp-for-azure-devops-boards/actions/workflows/cd-tag-build-and-release.yml)
 
+<a href="https://glama.ai/mcp/servers/@danielealbano/mcp-for-azure-devops">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@danielealbano/mcp-for-azure-devops/badge" />
+</a>
+
 A Model Context Protocol (MCP) server for interacting with Azure DevOps Boards and Work Items, written in Rust.
 
 ## Features
