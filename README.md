@@ -57,6 +57,11 @@ If you don't have the Azure CLI installed:
 brew install azure-cli
 ```
 
+**Windows (Scoop):**
+```powershell
+scoop install azure-cli
+```
+
 **Windows (Chocolatey):**
 ```powershell
 choco install azure-cli
